@@ -1,4 +1,4 @@
-import { createWallet,importWalletFromMnemonic,getWalletBalance } from "../services/walletService.js";
+import { createWallet,importWalletFromMnemonic,getWalletBalance,sendTransaction } from "../services/walletService.js";
 
 export async function importWallet(req,res){
     try{
@@ -46,10 +46,26 @@ export async function getWalletBalanceController(req, res) {
       return res.status(400).json({ error: "Wallet address is required" });
     }
 
-    const balance = await getWalletBalance(address);
-    return res.status(200).json({ address, balance });
+    const balanceData = await getWalletBalance(address);
+    return res.status(200).json(balanceData);
   } catch (error) {
     console.error("Error fetching wallet balance:", error);
     return res.status(500).json({ error: error.message });
+  }
+}
+
+export async function sendTransactionController(req,res){
+  try{
+    const {privateKey,to,amount} = req.body;
+    console.log("Send transaction request:", { to, amount, hasPrivateKey: !!privateKey });
+    const result = await sendTransaction(privateKey,to,amount);
+    return res.status(200).json(result);
+  }catch(error){
+    console.error("Error sending transaction:", error);
+    return res.status(500).json(
+      {
+        error:error.message
+      }
+    )
   }
 }

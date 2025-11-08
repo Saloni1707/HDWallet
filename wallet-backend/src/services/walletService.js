@@ -44,3 +44,27 @@ export async function getWalletBalance(address){
         throw new Error("Failed to fetch wallet balance: " + error.message);
     }
 }
+
+export async function sendTransaction(privateKey,to,amount){
+    try{
+        if(!privateKey || !to || !amount){
+            throw new Error("Missing parameters");
+        }
+        const provider = new ethers.JsonRpcProvider(
+            `https://sepolia.infura.io/v3/${process.env.INFURA_API_KEY}`
+        );
+        const wallet = new ethers.Wallet(privateKey,provider);
+
+        const transaction = await wallet.sendTransaction({
+            to,
+            value:ethers.parseEther(amount), //convert eth to wei
+        });
+        await transaction.wait();
+        return{
+            transactionHash:transaction.hash,
+        };
+    }catch(error){
+        throw new Error("Failed to send transaction: " + error.message);
+    }
+        
+}
